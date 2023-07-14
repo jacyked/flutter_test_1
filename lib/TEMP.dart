@@ -11,11 +11,10 @@ import 'package:provider/provider.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
-
 void main() async{ 
 
 
-  runApp(MyApp());
+  //runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -40,7 +39,6 @@ class MyApp extends StatelessWidget {
 
 class MyAppState extends ChangeNotifier {
   var current  = "";
-  var index = 0;
 
 
   var currGuess = ["","","","",""];
@@ -66,22 +64,16 @@ class MyAppState extends ChangeNotifier {
 
   Future<void> getWordle() async{
     var thisWordle = "";
-    final String response = await rootBundle.loadString('assets/wordle.json');
+    final String response = await rootBundle.loadString('assets/sample.json');
     final data = await json.decode(response);
     var intValue = Random().nextInt(2314);
-    thisWordle = data[intValue].toUpperCase();
+    thisWordle = data[intValue];
 
     current = thisWordle;
-    print("Word: $current");
-    notifyListeners();
-  }
-
-  void start(){
-    index = 1;
-    notifyListeners();
   }
 
 }
+
 
 
 class MyHomePage extends StatefulWidget {
@@ -90,77 +82,17 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  var wordle = "";
-  var index = 0;
-  
-
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    index = appState.index;
-
-    Widget page;
-
-    switch (index) {
-      case 0:
-        page = StartPage();
-        break;
-      case 1:
-        page = GeneratorPage();
-        break;
-      default:
-        throw UnimplementedError('no widget for $index');
-    }
-    return Scaffold(
-      body: 
-          Container(
-              child: page,
-            ),
-          
-        );
-  }
-}
-
-class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var appState = context.watch<MyAppState>();
     
 
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ElevatedButton(
-              onPressed: () {
-                appState.getWordle();
-                appState.start();
-              }, 
-              child: Text('Start'),
-            ),
-            
-        ],
-      )
-    );
-  }
-
-}
-
-class GeneratorPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    var appState = context.watch<MyAppState>();
-    var wordle = appState.current;
-
-
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          SafeArea(child: Text("Reload")),
-          GuessCard(pastGuesses: appState.pastGuesses,
-          wordle: appState.current,),
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            GuessCard(pastGuesses: appState.pastGuesses,),
             
             Padding(
               padding: const EdgeInsets.all(8.0),
@@ -246,8 +178,8 @@ class GeneratorPage extends StatelessWidget {
               }, 
               child: Text('Submit'),
             ),
-        ]
-          
+          ],
+        ),
       ),
     );
   }
@@ -258,18 +190,12 @@ class GuessCard extends StatelessWidget {
   const GuessCard({
     super.key,
     required this.pastGuesses,
-    required this.wordle,
   });
 
   final List pastGuesses;
-  final String wordle;
-  
-
-
 
   @override
   Widget build(BuildContext context) {
-    final List<String> wordleArr = wordle.split("");
     final theme = Theme.of(context); 
     final style = theme.textTheme.displayMedium!.copyWith(
       color: theme.colorScheme.onPrimary,
@@ -280,62 +206,46 @@ class GuessCard extends StatelessWidget {
     }
     else{
       print(pastGuesses);
-
-    Color getColour(String thisGuess, int index){
-      print("Word: $wordleArr");
-      print("Get Colour for $index slot: $thisGuess");
-      
-      if(wordleArr[index] == thisGuess){
-        return theme.colorScheme.primary;
-      }
-      if(wordleArr.contains(thisGuess)){
-        return theme.colorScheme.error;
-      }
-      else{
-        return theme.colorScheme.outline;
-      }
-    }
-
     return Expanded(
       child: ListView.builder(
         itemCount: pastGuesses.length,
         itemBuilder: (BuildContext ctxt, int index){
           return Row(children: [
-            Expanded(child: Card(
-            color: getColour(pastGuesses[index][0], 0),
+            Card(
+            color: theme.colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-                child: Text(pastGuesses[index][0], textAlign: TextAlign.center, style: style),
+              padding: const EdgeInsets.all(20),
+                child: Text(pastGuesses[index][0], style: style),
               ),
-            ),),Expanded(child: Card(
-            color: getColour(pastGuesses[index][1], 1),
+            ),
+            Card(
+            color: theme.colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-                child: Text(pastGuesses[index][1], textAlign: TextAlign.center, style: style),
+              padding: const EdgeInsets.all(20),
+                child: Text(pastGuesses[index][1], style: style),
               ),
-            ),),Expanded(child: Card(
-            color: getColour(pastGuesses[index][2], 2),
+            ),
+            Card(
+            color: theme.colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-                child: Text(pastGuesses[index][2], textAlign: TextAlign.center, style: style),
+              padding: const EdgeInsets.all(20),
+                child: Text(pastGuesses[index][2], style: style),
               ),
-            ),),Expanded(child: Card(
-            color: getColour(pastGuesses[index][3], 3),
+            ),
+            Card(
+            color: theme.colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-                child: Text(pastGuesses[index][3], textAlign: TextAlign.center, style: style),
+              padding: const EdgeInsets.all(20),
+                child: Text(pastGuesses[index][3], style: style),
               ),
-            ), ),Expanded(child: Card(
-            color: getColour(pastGuesses[index][4], 4),
+            ),
+            Card(
+            color: theme.colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(10),
-                child: Text(pastGuesses[index][4], textAlign: TextAlign.center, style: style),
+              padding: const EdgeInsets.all(20),
+                child: Text(pastGuesses[index][4], style: style),
               ),
-            ),),
-            
-            
-            
-            
+            ),
           ],);
         },
       ),
