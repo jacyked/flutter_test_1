@@ -41,10 +41,12 @@ class MyApp extends StatelessWidget {
 class MyAppState extends ChangeNotifier {
   var current  = "";
   var index = 0;
-
-
   var currGuess = ["","","","",""];
   List pastGuesses = [[0]];
+  var wordList = [];
+  var guessed = 0;
+  var buttonText = "Submit";
+  
 
   void updateCurrGuess(index, text){
     print("Index: $index Text: $text");
@@ -53,7 +55,17 @@ class MyAppState extends ChangeNotifier {
   }
 
   void addGuess(){
-    var toAdd = currGuess.join().toUpperCase();
+    var toAdd = currGuess.join().toLowerCase();
+    print("Guess: $toAdd Word: $current");
+    if(wordList.isEmpty){
+      loadWordles();
+    }
+    if(!wordList.contains(toAdd)){
+      print("Not found");
+      //Error message
+      return;
+    }
+    toAdd = toAdd.toUpperCase();
     if(pastGuesses[0][0] == 0){
       pastGuesses[0] = toAdd;
     }
@@ -61,17 +73,35 @@ class MyAppState extends ChangeNotifier {
       pastGuesses.add(toAdd);
     }
     print(pastGuesses);
+    if(toAdd == current){
+      guessed = 1;
+      buttonText = "Next";
+    }
     notifyListeners();
   }
 
-  Future<void> getWordle() async{
-    var thisWordle = "";
+  void getNext() {
+    guessed = 0;
+    buttonText = "Submit";
+    currGuess = ["","","","",""];
+    pastGuesses = [[0]];
+    getWordle();
+
+  }
+
+  Future<void> loadWordles() async{
     final String response = await rootBundle.loadString('assets/wordle.json');
     final data = await json.decode(response);
-    var intValue = Random().nextInt(2314);
-    thisWordle = data[intValue].toUpperCase();
+    wordList = data;
 
-    current = thisWordle;
+  }
+
+  Future<void> getWordle() async{
+    if(wordList.isEmpty){
+      await loadWordles();
+    }
+    var intValue = Random().nextInt(wordList.length - 1);
+    current = wordList[intValue].toUpperCase();
     print("Word: $current");
     notifyListeners();
   }
@@ -161,94 +191,99 @@ class GeneratorPage extends StatelessWidget {
           SafeArea(child: Text("Reload")),
           GuessCard(pastGuesses: appState.pastGuesses,
           wordle: appState.current,),
-            
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Expanded(child: 
-                  TextField(
-                    textInputAction: TextInputAction.next,
-                    maxLength: 1,
-                    onChanged: (text) {
-                      appState.updateCurrGuess(0, text);
-                    },
-                    decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '',
-                    counterText: '',
-                    ),)
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(child: 
-                  TextField(
-                    textInputAction: TextInputAction.next,
-                    maxLength: 1,
-                    onChanged: (text) {
-                      appState.updateCurrGuess(1, text);
-                    },
-                    decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '',
-                    counterText: '',
-                    ),)
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(child: 
-                  TextField(
-                    textInputAction: TextInputAction.next,
-                    maxLength: 1,
-                    onChanged: (text) {
-                      appState.updateCurrGuess(2, text);
-                    },
-                    decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '',
-                    counterText: '',
-                    ),)
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(child: 
-                  TextField(
-                    textInputAction: TextInputAction.next,
-                    maxLength: 1,
-                    onChanged: (text) {
-                      appState.updateCurrGuess(3, text);
-                    },
-                    decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '',
-                    counterText: '',
-                    ),)
-                  ),
-                  SizedBox(width: 10),
-                  Expanded(child: 
-                  TextField(
-                    textInputAction: TextInputAction.done,
-                    maxLength: 1,
-                    onChanged: (text) {
-                      appState.updateCurrGuess(4, text);
-                    },
-                    decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: '',
-                    counterText: '',
-                    ),)
-                  ),
-                  
-                ],
+          SafeArea(
+            child: Column(children: [ 
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Expanded(child: 
+                    TextField(
+                      textInputAction: TextInputAction.next,
+                      maxLength: 1,
+                      onChanged: (text) {
+                        appState.updateCurrGuess(0, text);
+                      },
+                      decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '',
+                      counterText: '',
+                      ),)
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(child: 
+                    TextField(
+                      textInputAction: TextInputAction.next,
+                      maxLength: 1,
+                      onChanged: (text) {
+                        appState.updateCurrGuess(1, text);
+                      },
+                      decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '',
+                      counterText: '',
+                      ),)
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(child: 
+                    TextField(
+                      textInputAction: TextInputAction.next,
+                      maxLength: 1,
+                      onChanged: (text) {
+                        appState.updateCurrGuess(2, text);
+                      },
+                      decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '',
+                      counterText: '',
+                      ),)
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(child: 
+                    TextField(
+                      textInputAction: TextInputAction.next,
+                      maxLength: 1,
+                      onChanged: (text) {
+                        appState.updateCurrGuess(3, text);
+                      },
+                      decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '',
+                      counterText: '',
+                      ),)
+                    ),
+                    SizedBox(width: 10),
+                    Expanded(child: 
+                    TextField(
+                      textInputAction: TextInputAction.done,
+                      maxLength: 1,
+                      onChanged: (text) {
+                        appState.updateCurrGuess(4, text);
+                      },
+                      decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: '',
+                      counterText: '',
+                      ),)
+                    ),
+                    
+                  ],
+                ),
               ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                appState.addGuess();
-              }, 
-              child: Text('Submit'),
-            ),
-        ]
-          
-      ),
+              Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if(appState.guessed == 1){appState.getNext();}else{appState.addGuess();}
+                    }, 
+                    child: Text(appState.buttonText),
+                  ),
+                ),
+                ],),
+          ), 
+              
+        ]),
     );
   }
 }
