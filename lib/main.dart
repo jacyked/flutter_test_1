@@ -50,6 +50,7 @@ class MyAppState extends ChangeNotifier {
   var buttonText = "Submit";
   final sw = Stopwatch();
   var saveTime = 0;
+  var resetTimer = false;
   
 
   void updateCurrGuess(index, text){
@@ -94,6 +95,12 @@ class MyAppState extends ChangeNotifier {
     pastGuesses = [[0]];
     getWordle();
 
+  }
+
+  void reset(){
+    resetTimer = true;
+    notifyListeners();
+    getNext();
   }
 
   Future<void> loadWordles() async{
@@ -197,7 +204,15 @@ class GeneratorPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           //TODO create stopwatch stream
-          SafeArea(child: TimerStreamer()),
+          SafeArea(child: Row(children: [
+            Expanded(child: Wrap(children: [Icon(Icons.timer), TimerStreamer()])),
+            IconButton(
+              onPressed: (){ appState.reset();}, 
+              icon: const Icon(Icons.restart_alt_rounded),
+              tooltip: "Reset",
+              enableFeedback: true,
+              )
+            ])),
           GuessCard(pastGuesses: appState.pastGuesses,
           wordle: appState.current,),
           SafeArea(
@@ -286,6 +301,7 @@ class GeneratorPage extends StatelessWidget {
                     onPressed: () {
                       if(appState.guessed == 1){appState.getNext();}else{appState.addGuess();}
                     }, 
+                    
                     child: Text(appState.buttonText),
                   ),
                 ),
@@ -477,6 +493,14 @@ class _TimerStreamerState extends State<TimerStreamer> {
       _timer = 0;
       resetStream();
       _sub.resume();
+      _completed = false;
+    }
+    //reset
+    if(appState.resetTimer == true){
+      appState.resetTimer = false;
+      _sub.cancel();
+      _timer = 0;
+      resetStream();
       _completed = false;
     }
     
