@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:ffi';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:english_words/english_words.dart';
@@ -46,6 +48,8 @@ class MyAppState extends ChangeNotifier {
   var wordList = [];
   var guessed = 0;
   var buttonText = "Submit";
+  final sw = Stopwatch();
+  var saveTime = 0;
   
 
   void updateCurrGuess(index, text){
@@ -76,12 +80,15 @@ class MyAppState extends ChangeNotifier {
     if(toAdd == current){
       guessed = 1;
       buttonText = "Next";
+      sw.stop();
+      //TODO add stopwatch time to array and save best times
     }
     notifyListeners();
   }
 
   void getNext() {
     guessed = 0;
+    sw.reset();
     buttonText = "Submit";
     currGuess = ["","","","",""];
     pastGuesses = [[0]];
@@ -108,6 +115,7 @@ class MyAppState extends ChangeNotifier {
 
   void start(){
     index = 1;
+    sw.start();
     notifyListeners();
   }
 
@@ -188,7 +196,8 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SafeArea(child: Text("Reload")),
+          //TODO create stopwatch stream
+          SafeArea(child: TimerStreamer()),
           GuessCard(pastGuesses: appState.pastGuesses,
           wordle: appState.current,),
           SafeArea(
@@ -401,5 +410,86 @@ class CurrentGuess extends StatelessWidget{
       ],
     );
     
+  }
+}
+
+class TimerStreamer extends StatefulWidget{
+  @override
+  State<TimerStreamer> createState() => _TimerStreamerState();
+}
+
+class _TimerStreamerState extends State<TimerStreamer> {
+
+  
+  Stream _myStream =
+        Stream.periodic(const Duration(seconds: 1), (int count) {
+          return count;
+
+
+
+    });
+  
+
+  late StreamSubscription _sub;
+  int _timer = 0;
+  bool _completed = false;
+
+  void resetStream(){
+    _myStream =
+        Stream.periodic(const Duration(seconds: 1), (int count) {
+          return count;
+    });
+    _sub = _myStream.listen((event) {
+        setState(() {
+          _timer = event;
+          
+        });
+      });
+  }
+
+  @override
+    void initState() {
+      _sub = _myStream.listen((event) {
+        setState(() {
+          _timer = event;
+          
+        });
+      });
+      super.initState();
+    }
+
+  
+
+  @override
+  Widget build(BuildContext context) {
+    var appState = context.watch<MyAppState>();
+    
+    var guessed = appState.guessed;
+    print("State: $_completed Guessed: $guessed");
+    if(appState.guessed == 1){
+      appState.saveTime = _timer;
+      _sub.pause();
+      _completed = true;
+      
+    }
+    
+    if(appState.guessed == 0 && _completed){
+      _timer = 0;
+      resetStream();
+      _sub.resume();
+      _completed = false;
+    }
+    
+    
+
+    
+
+    return Text(_timer.toString());
+  }
+  @override
+  void dispose() {
+
+    _sub.cancel();
+    super.dispose();
   }
 }
