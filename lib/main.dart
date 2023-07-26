@@ -503,12 +503,38 @@ class _TimerStreamerState extends State<TimerStreamer> {
       resetStream();
       _completed = false;
     }
-    
-    
 
-    
+    double dtimer = _timer as double;
+    int hours = (dtimer / 3600).floor();
+    dtimer = dtimer - (hours * 3600);
 
-    return Text(_timer.toString());
+    int minutes = (dtimer / 60).floor();
+    dtimer = dtimer - (minutes * 60);
+
+    int seconds = dtimer as int;
+
+    String s_hours;
+    if(hours < 10){
+      s_hours = "0" + hours.toString();
+    }
+    else{
+      s_hours = hours.toString();
+    }
+    String s_minutes;
+    if(minutes < 10){
+      s_minutes = "0" + minutes.toString();
+    }else{
+      s_minutes = minutes.toString();
+    }
+
+    String s_seconds;
+    if(seconds < 10){
+      s_seconds = "0" + seconds.toString();
+    }else{
+      s_seconds = seconds.toString();
+    }
+
+    return Text("$s_hours:$s_minutes:$s_seconds");
   }
   @override
   void dispose() {
