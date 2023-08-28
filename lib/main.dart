@@ -13,10 +13,8 @@ import 'package:provider/provider.dart';
 
 import 'package:hive_flutter/hive_flutter.dart';
 
-
+//This project is practice to learn Flutter, please forgive the rough formatting. 
 void main() async{ 
-
-
   runApp(MyApp());
 }
 
@@ -40,6 +38,8 @@ class MyApp extends StatelessWidget {
   }
 }
 
+//State change notifier
+//TODO refactor to improve efficiency, divy up into individual stateful widgets
 class MyAppState extends ChangeNotifier {
   var current  = "";
   var index = 0;
@@ -53,12 +53,16 @@ class MyAppState extends ChangeNotifier {
   var resetTimer = false;
   
 
+  //updates current guess
+  //requires index of current guess, as well as text containing guess.
+  //
   void updateCurrGuess(index, text){
     print("Index: $index Text: $text");
     currGuess[index] = text;
     
   }
 
+  //assess current guess; determine if empty, valid, and correct. 
   void addGuess(){
     var toAdd = currGuess.join().toLowerCase();
     print("Guess: $toAdd Word: $current");
@@ -82,11 +86,12 @@ class MyAppState extends ChangeNotifier {
       guessed = 1;
       buttonText = "Next";
       sw.stop();
-      //TODO add stopwatch time to array and save best times
+      //TODO remove stopwatch features here - moved to stateful widget TimerStreamer
     }
     notifyListeners();
   }
 
+  //reset functionality and generate new wordle
   void getNext() {
     guessed = 0;
     sw.reset();
@@ -97,12 +102,14 @@ class MyAppState extends ChangeNotifier {
 
   }
 
+  //reset timer, redundant and needs to be refactored into getNext
   void reset(){
     resetTimer = true;
     notifyListeners();
     getNext();
   }
 
+  //loads all wordles into wordList
   Future<void> loadWordles() async{
     final String response = await rootBundle.loadString('assets/wordle.json');
     final data = await json.decode(response);
@@ -110,6 +117,7 @@ class MyAppState extends ChangeNotifier {
 
   }
 
+  //selects wordle for current round
   Future<void> getWordle() async{
     if(wordList.isEmpty){
       await loadWordles();
@@ -120,6 +128,7 @@ class MyAppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  //initiates index for current guess and starts timer - needs to be refactored to remove timer
   void start(){
     index = 1;
     sw.start();
@@ -166,6 +175,8 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+//Start page
+//TODO add 5 best times and 5 lowest guesses display
 class StartPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -191,6 +202,8 @@ class StartPage extends StatelessWidget {
 
 }
 
+//Guessing page
+//TODO change colors to better options, add animation when new guess added to list
 class GeneratorPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -203,7 +216,6 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          //TODO create stopwatch stream
           SafeArea(child: Row(children: [
             Expanded(child: Wrap(children: [Icon(Icons.timer), TimerStreamer()])),
             IconButton(
@@ -313,7 +325,8 @@ class GeneratorPage extends StatelessWidget {
   }
 }
 
-
+//Panel for individual selected guesses, color selection done here.
+//TODO improve color selection, fix double letters issue
 class GuessCard extends StatelessWidget {
   const GuessCard({
     super.key,
@@ -404,6 +417,7 @@ class GuessCard extends StatelessWidget {
   }
 }
 
+//Current guess display panel
 class CurrentGuess extends StatelessWidget{
   const CurrentGuess({
     super.key,
@@ -429,6 +443,8 @@ class CurrentGuess extends StatelessWidget{
   }
 }
 
+//Timer controller 
+//TODO record top 5 best times and display on start page
 class TimerStreamer extends StatefulWidget{
   @override
   State<TimerStreamer> createState() => _TimerStreamerState();
@@ -504,6 +520,8 @@ class _TimerStreamerState extends State<TimerStreamer> {
       _completed = false;
     }
 
+
+    //TODO refactor time formatting to own function
     double dtimer = _timer as double;
     int hours = (dtimer / 3600).floor();
     dtimer = dtimer - (hours * 3600);

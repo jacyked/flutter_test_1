@@ -5,7 +5,7 @@ part of 'wordle.dart';
 // **************************************************************************
 // TypeAdapterGenerator
 // **************************************************************************
-
+//TODO remove
 class WordleAdapter extends TypeAdapter<Wordle> {
   @override
   final int typeId = 1;
